@@ -14,7 +14,7 @@ public:
   void wait() const;
 
 private:
-  std::unique_ptr<MPI_Request> request;
+  std::unique_ptr<MPI_Request> request = nullptr;
 };
 
 void wait_all(const std::vector<Request> &requests);

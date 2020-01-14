@@ -28,6 +28,7 @@ Request isend(const array_const_view<T, n_dims, row_major> &arr,
   auto ptr = (void *)arr.raw();
   auto size = arr.size() * sizeof(T);
   auto request = std::make_unique<MPI_Request>();
+  *request = MPI_Request{};
 
   auto code
       = MPI_Isend(ptr, size, MPI_BYTE, receiver, tag, comm, request.get());
@@ -46,6 +47,7 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
   auto ptr = (void *)arr.raw();
   auto size = arr.size() * sizeof(T);
   auto request = std::make_unique<MPI_Request>();
+  *request = MPI_Request{};
 
   auto code = MPI_Irecv(ptr, size, MPI_BYTE, sender, tag, comm, request.get());
   LOG_ERR_IF(code != MPI_SUCCESS,
