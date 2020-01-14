@@ -13,9 +13,9 @@ void send(const array_const_view<T, n_dims, row_major> &arr,
           MPI_Comm comm) {
 
   auto ptr = (void *)arr.raw();
-  auto size = arr.size() * sizeof(T);
+  auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
 
-  auto code = MPI_Send(ptr, size, MPI_BYTE, receiver, tag, comm);
+  auto code = MPI_Send(ptr, n_bytes, MPI_BYTE, receiver, tag, comm);
   LOG_ERR_IF(code != MPI_SUCCESS, string_format("MPI_Send failed. [%d]", code));
 }
 
@@ -26,12 +26,12 @@ Request isend(const array_const_view<T, n_dims, row_major> &arr,
               MPI_Comm comm) {
 
   auto ptr = (void *)arr.raw();
-  auto size = arr.size() * sizeof(T);
+  auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
   auto request = std::make_unique<MPI_Request>();
   *request = MPI_Request{};
 
   auto code
-      = MPI_Isend(ptr, size, MPI_BYTE, receiver, tag, comm, request.get());
+      = MPI_Isend(ptr, n_bytes, MPI_BYTE, receiver, tag, comm, request.get());
   LOG_ERR_IF(code != MPI_SUCCESS,
              string_format("MPI_Isend failed. [%d]", code));
 
@@ -45,11 +45,11 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
               MPI_Comm comm) {
 
   auto ptr = (void *)arr.raw();
-  auto size = arr.size() * sizeof(T);
+  auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
   auto request = std::make_unique<MPI_Request>();
   *request = MPI_Request{};
 
-  auto code = MPI_Irecv(ptr, size, MPI_BYTE, sender, tag, comm, request.get());
+  auto code = MPI_Irecv(ptr, n_bytes, MPI_BYTE, sender, tag, comm, request.get());
   LOG_ERR_IF(code != MPI_SUCCESS,
              string_format("MPI_Irecv failed. [%d]", code));
 
@@ -62,9 +62,9 @@ void bcast(const array_view<T, n_dims, row_major> &view,
            const MPI_Comm &comm) {
 
   auto ptr = (void *)view.raw();
-  auto size = view.size() * sizeof(T);
+  auto n_bytes = integer_cast<int>(view.size() * sizeof(T));
 
-  auto code = MPI_Bcast(ptr, size, MPI_BYTE, root, comm);
+  auto code = MPI_Bcast(ptr, n_bytes, MPI_BYTE, root, comm);
   LOG_ERR_IF(code != MPI_SUCCESS, string_format("MPI_Bcast failed. [%d]", code))
 }
 
