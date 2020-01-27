@@ -4,4 +4,6 @@
 #include "mpi_decl.hpp"
 #include "mpi_impl.hpp"
 
+#include "mpi_tag_constants.hpp"
+
 #endif // ZISA_MPI_HPP
