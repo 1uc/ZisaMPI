@@ -19,8 +19,8 @@ private:
 
 void wait_all(const std::vector<Request> &requests);
 
-int size(const MPI_Comm &mpi_comm);
-int rank(const MPI_Comm &mpi_comm);
+int size(const MPI_Comm &mpi_comm = MPI_COMM_WORLD);
+int rank(const MPI_Comm &mpi_comm = MPI_COMM_WORLD);
 
 template <class T, int n_dims>
 void send(const array_const_view<T, n_dims, row_major> &arr,
