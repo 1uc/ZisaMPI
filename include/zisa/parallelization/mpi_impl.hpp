@@ -49,7 +49,8 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
   auto request = std::make_unique<MPI_Request>();
   *request = MPI_Request{};
 
-  auto code = MPI_Irecv(ptr, n_bytes, MPI_BYTE, sender, tag, comm, request.get());
+  auto code
+      = MPI_Irecv(ptr, n_bytes, MPI_BYTE, sender, tag, comm, request.get());
   LOG_ERR_IF(code != MPI_SUCCESS,
              string_format("MPI_Irecv failed. [%d]", code));
 
@@ -67,6 +68,27 @@ void bcast(const array_view<T, n_dims, row_major> &view,
   auto code = MPI_Bcast(ptr, n_bytes, MPI_BYTE, root, comm);
   LOG_ERR_IF(code != MPI_SUCCESS, string_format("MPI_Bcast failed. [%d]", code))
 }
+
+// Thanks to:
+// https://stackoverflow.com/a/40808411
+
+#ifndef MPI_SIZE_T
+#if SIZE_MAX == UCHAR_MAX
+#define MPI_SIZE_T MPI_UNSIGNED_CHAR
+#elif SIZE_MAX == USHRT_MAX
+#define MPI_SIZE_T MPI_UNSIGNED_SHORT
+#elif SIZE_MAX == UINT_MAX
+#define MPI_SIZE_T MPI_UNSIGNED
+#elif SIZE_MAX == ULONG_MAX
+#define MPI_SIZE_T MPI_UNSIGNED_LONG
+#elif SIZE_MAX == ULLONG_MAX
+#define MPI_SIZE_T MPI_UNSIGNED_LONG_LONG
+#else
+#error "`sizeof(size_t)` does not match anything we'd expect."
+#endif
+#else
+#error "Someone already defined `MPI_SIZE_T`."
+#endif
 
 }
 }
