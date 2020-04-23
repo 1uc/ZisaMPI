@@ -1,7 +1,7 @@
 #ifndef ZISA_MPI_IMPL_HPP_CUIUQ
 #define ZISA_MPI_IMPL_HPP_CUIUQ
 
-#include "mpi_decl.hpp"
+#include "zisa/mpi/mpi_decl.hpp"
 
 namespace zisa {
 namespace mpi {

@@ -1,4 +1,4 @@
-#include <zisa/parallelization/mpi.hpp>
+#include <zisa/mpi/mpi.hpp>
 
 namespace zisa {
 namespace mpi {
