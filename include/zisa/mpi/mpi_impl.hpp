@@ -3,6 +3,10 @@
 
 #include "zisa/mpi/mpi_decl.hpp"
 
+#if (ZISA_HAS_MPI != 1)
+#error "Using MPI with MPI support."
+#endif
+
 namespace zisa {
 namespace mpi {
 
