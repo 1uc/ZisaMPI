@@ -30,6 +30,17 @@ int rank(const MPI_Comm &mpi_comm) {
   return rank;
 }
 
+bool test_intra(MPI_Comm const &comm) { return !test_inter(comm); }
+bool test_inter(MPI_Comm const &comm) {
+  int flag = -1;
+  auto code = MPI_Comm_test_inter(comm, &flag);
+  LOG_ERR_IF(code != MPI_SUCCESS, "Failed MPI_Comm_test_inter.");
+
+  return bool(flag);
+}
+
+void barrier(MPI_Comm const &comm) { MPI_Barrier(comm); }
+
 }
 
 }

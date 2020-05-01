@@ -32,7 +32,7 @@ Request isend(const array_const_view<T, n_dims, row_major> &arr,
   auto ptr = (void *)arr.raw();
   auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
   auto request = std::make_unique<MPI_Request>();
-  *request = MPI_Request{};
+  *request = MPI_Request{}; // Looks dodgy...
 
   auto code
       = MPI_Isend(ptr, n_bytes, MPI_BYTE, receiver, tag, comm, request.get());
@@ -40,6 +40,53 @@ Request isend(const array_const_view<T, n_dims, row_major> &arr,
              string_format("MPI_Isend failed. [%d]", code));
 
   return Request(std::move(request));
+}
+
+template <class POD>
+Request isend_pod(const POD &pod, int receiver, int tag, MPI_Comm comm) {
+  auto ptr = (void *)(&pod);
+  auto n_bytes = integer_cast<int>(sizeof(POD));
+
+  auto request = std::make_unique<MPI_Request>();
+  *request = MPI_Request{};
+
+  auto code
+      = MPI_Isend(ptr, n_bytes, MPI_BYTE, receiver, tag, comm, request.get());
+
+  LOG_ERR_IF(code != MPI_SUCCESS,
+             string_format("MPI_Isend failed. [%d]", code));
+
+  return Request(std::move(request));
+}
+
+template <class POD>
+std::pair<POD, Status> recv_pod(int src, int tag, MPI_Comm comm) {
+  auto pod = POD{};
+  auto ptr = (void *)(&pod);
+  auto n_bytes = integer_cast<int>(sizeof(pod));
+  auto status = MPI_Status();
+
+  auto code = MPI_Recv(ptr, n_bytes, MPI_BYTE, src, tag, comm, &status);
+  LOG_ERR_IF(code != MPI_SUCCESS, "Failed `recv_pod`.");
+
+  return {pod, Status(status)};
+}
+
+template <class T, int n_dims>
+Status recv(const array_view<T, n_dims, row_major> &arr,
+            int sender,
+            int tag,
+            MPI_Comm comm) {
+
+  auto ptr = (void *)arr.raw();
+  auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
+  auto status = MPI_Status{};
+
+  auto code = MPI_Recv(ptr, n_bytes, MPI_BYTE, sender, tag, comm, &status);
+  LOG_ERR_IF(code != MPI_SUCCESS,
+             string_format("MPI_Irecv failed. [%d]", code));
+
+  return Status(status);
 }
 
 template <class T, int n_dims>
@@ -59,6 +106,20 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
              string_format("MPI_Irecv failed. [%d]", code));
 
   return Request(std::move(request));
+}
+
+template <class T>
+void allgather(const array_view<T, 1, row_major> &view, const MPI_Comm &comm) {
+  // If it's an intracomm we can do inplace.
+  assert(zisa::mpi::test_intra(comm));
+
+  auto ptr = (void *)raw_ptr(view);
+  auto n_bytes = integer_cast<int>(sizeof(view[0]));
+
+  auto code = MPI_Allgather(
+      MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, ptr, n_bytes, MPI_BYTE, comm);
+
+  LOG_ERR_IF(code != MPI_SUCCESS, "Failed MPI_Allgather.");
 }
 
 template <class T, int n_dims>
