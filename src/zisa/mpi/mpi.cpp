@@ -13,7 +13,7 @@ void Request::wait() const {
 }
 
 void wait_all(const std::vector<Request> &requests) {
-  for(const auto &r : requests) {
+  for (const auto &r : requests) {
     r.wait();
   }
 }
