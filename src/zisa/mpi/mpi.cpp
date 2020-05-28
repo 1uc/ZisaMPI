@@ -41,6 +41,13 @@ bool test_inter(MPI_Comm const &comm) {
 
 void barrier(MPI_Comm const &comm) { MPI_Barrier(comm); }
 
+MPI_Comm comm_split(MPI_Comm old_comm, int color, int rank) {
+  MPI_Comm new_comm;
+  auto status = MPI_Comm_split(old_comm, color, rank, &new_comm);
+  LOG_ERR_IF(status != 0, string_format("Failed MPI_Comm_split. [%d]", status));
+
+  return new_comm;
 }
 
+}
 }

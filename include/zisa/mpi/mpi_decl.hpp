@@ -69,12 +69,19 @@ template <class POD>
 std::pair<POD, Status> recv_pod(int src, int tag, MPI_Comm comm);
 
 template <class T>
+void gather(const array_view<T, 1, row_major> &iobuff,
+            int root,
+            const MPI_Comm &comm);
+
+template <class T>
 void allgather(const array_view<T, 1, row_major> &arr, const MPI_Comm &comm);
 
 template <class T, int n_dims>
 void bcast(const array_view<T, n_dims, row_major> &view,
            int root,
            const MPI_Comm &comm);
+
+MPI_Comm comm_split(MPI_Comm old_comm, int color, int rank);
 
 void barrier(const MPI_Comm &comm);
 

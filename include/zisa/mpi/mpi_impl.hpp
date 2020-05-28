@@ -109,6 +109,30 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
 }
 
 template <class T>
+void gather(const array_view<T, 1, row_major> &iobuff,
+            int root,
+            const MPI_Comm &comm) {
+  assert(zisa::mpi::test_intra(comm));
+  auto rank = zisa::mpi::rank(comm);
+  auto size = zisa::mpi::size(comm);
+
+  auto ptr = (void *)raw_ptr(iobuff);
+  auto n_elements
+      = (rank == root ? iobuff.size() / int_t(size) : iobuff.size());
+  auto n_bytes = integer_cast<int>(n_elements * sizeof(iobuff[0]));
+
+  if (rank == root) {
+    auto code = MPI_Gather(
+        MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, ptr, n_bytes, MPI_BYTE, root, comm);
+    LOG_ERR_IF(code != MPI_SUCCESS, "Root failed MPI_Allgather.");
+  } else {
+    auto code = MPI_Gather(
+        ptr, n_bytes, MPI_BYTE, nullptr, 0, MPI_DATATYPE_NULL, root, comm);
+    LOG_ERR_IF(code != MPI_SUCCESS, "Worker failed MPI_Allgather.");
+  }
+}
+
+template <class T>
 void allgather(const array_view<T, 1, row_major> &view, const MPI_Comm &comm) {
   // If it's an intracomm we can do inplace.
   assert(zisa::mpi::test_intra(comm));
