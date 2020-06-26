@@ -6,9 +6,29 @@
 namespace zisa {
 namespace mpi {
 
-class Request {
+class [[nodiscard]] Request {
 public:
   explicit Request(std::unique_ptr<MPI_Request> request);
+
+  Request() = default;
+  Request(const Request &) = delete;
+  Request(Request &&) = default;
+
+  Request &operator=(const Request &) = delete;
+  Request &operator=(Request &&) = default;
+
+  ~Request() {
+    if (request != nullptr) {
+      int is_complete;
+      MPI_Test(request.get(), &is_complete, MPI_STATUS_IGNORE);
+
+      // This would be an outright error, if it weren't for destructors being
+      // implicitly `noexcept`.
+      // This is probably never a harmless warning.
+      LOG_WARN_IF(is_complete == 0,
+                  " !! Unfinished non-blocking communication !!!!!");
+    }
+  }
 
   /// Wait until the data transfer is complete.
   void wait() const;
