@@ -12,6 +12,19 @@ void Request::wait() const {
   }
 }
 
+Request::~Request() {
+  if (request != nullptr) {
+    int is_complete;
+    MPI_Test(request.get(), &is_complete, MPI_STATUS_IGNORE);
+
+    // This would be an outright error, if it weren't for destructors being
+    // implicitly `noexcept`.
+    // This is probably never a harmless warning.
+    LOG_WARN_IF(is_complete == 0,
+                " !! Unfinished non-blocking communication !!!!!");
+  }
+}
+
 void wait_all(const std::vector<Request> &requests) {
   for (const auto &r : requests) {
     r.wait();
@@ -49,5 +62,11 @@ MPI_Comm comm_split(MPI_Comm old_comm, int color, int rank) {
   return new_comm;
 }
 
+Status::Status(int source, int tag, int error)
+    : source(source), tag(tag), error(error) {}
+
+Status::Status(const MPI_Status &status)
+    : source(status.MPI_SOURCE), tag(status.MPI_TAG), error(status.MPI_ERROR) {}
 }
+
 }

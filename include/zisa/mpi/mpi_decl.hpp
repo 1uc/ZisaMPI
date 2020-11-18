@@ -1,6 +1,11 @@
 #ifndef ZISA_MPI_DECL_HPP_KOIIO
 #define ZISA_MPI_DECL_HPP_KOIIO
 
+#if (ZISA_HAS_MPI != 1)
+#error "Using MPI without MPI support."
+#endif
+
+#include <mpi.h>
 #include <zisa/memory/array_view.hpp>
 
 namespace zisa {
@@ -17,18 +22,7 @@ public:
   Request &operator=(const Request &) = delete;
   Request &operator=(Request &&) = default;
 
-  ~Request() {
-    if (request != nullptr) {
-      int is_complete;
-      MPI_Test(request.get(), &is_complete, MPI_STATUS_IGNORE);
-
-      // This would be an outright error, if it weren't for destructors being
-      // implicitly `noexcept`.
-      // This is probably never a harmless warning.
-      LOG_WARN_IF(is_complete == 0,
-                  " !! Unfinished non-blocking communication !!!!!");
-    }
-  }
+  ~Request();
 
   /// Wait until the data transfer is complete.
   void wait() const;
@@ -42,13 +36,9 @@ struct Status {
   int tag;
   int error;
 
-  Status(int source, int tag, int error)
-      : source(source), tag(tag), error(error) {}
+  Status(int source, int tag, int error);
 
-  explicit Status(const MPI_Status &status)
-      : source(status.MPI_SOURCE),
-        tag(status.MPI_TAG),
-        error(status.MPI_ERROR) {}
+  explicit Status(const MPI_Status &status);
 };
 
 void wait_all(const std::vector<Request> &requests);
