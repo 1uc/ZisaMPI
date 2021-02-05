@@ -25,7 +25,7 @@ then
 fi
 
 mkdir -p ${source_dir}
-for dep in $zisa_dependencies
+for dep in "${zisa_dependencies[@]}
 do
     echo ${src_dir}
     src_dir=${source_dir}/$dep
