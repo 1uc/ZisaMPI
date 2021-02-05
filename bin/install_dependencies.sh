@@ -51,6 +51,7 @@ do
 
     cmake -DCMAKE_INSTALL_PREFIX=${install_dir}/zisa \
           -DCMAKE_PREFIX_PATH=${install_dir}/zisa/lib/cmake/zisa \
+          -DCMAKE_MODULE_PATH=${install_dir}/conan \
           -DCMAKE_PROJECT_${dep}_INCLUDE=${install_dir}/conan/conan_paths.cmake \
           -DCMAKE_BUILD_TYPE=Release \
           ..
