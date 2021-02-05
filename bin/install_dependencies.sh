@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+set -o xtrace
+
 if [[ "$#" -ne 2 ]]
 then
     echo "Usage: $0 COMPILER DESTINATION"
