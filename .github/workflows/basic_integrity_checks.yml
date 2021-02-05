@@ -32,16 +32,13 @@ jobs:
 
       - name: Obtain access to private repos.
         env:
-          ZISA_CORE_SSH_KEY: ${{ secrets.ZISA_CORE_SSH_KEY }}
-          ZISA_MEMORY_SSH_KEY: ${{ secrets.ZISA_MEMORY_SSH_KEY }}
+          ZISA_BOT_SSH_KEY: ${{ secrets.ZISA_BOT_SSH_KEY }}
 
         run: |
           mkdir -p ${HOME}/.ssh
-          echo "${ZISA_CORE_SSH_KEY}" > ${HOME}/.ssh/id_ed25519_core
-          chmod 700 ${HOME}/.ssh/id_ed25519_core
+          echo "${ZISA_BOT_SSH_KEY}" > ${HOME}/.ssh/id_ed25519
+          chmod 700 ${HOME}/.ssh/id_ed25519
 
-          echo "${ZISA_MEMORY_SSH_KEY}" > ${HOME}/.ssh/id_ed25519_memory
-          chmod 700 ${HOME}/.ssh/id_ed25519_memory
 
       - name: Install MPI
         if: matrix.zisa_has_mpi == 1
@@ -59,10 +56,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          eval $(ssh-agent)
-          ssh-add ~/.ssh/id_ed25519_core
-          ssh-add ~/.ssh/id_ed25519_memory
-
           export PATH=${PATH}:${HOME}/.local/bin
           bin/install_dependencies.sh ${CC} ${HOME}/${REL_INSTALL_ROOT}
 
