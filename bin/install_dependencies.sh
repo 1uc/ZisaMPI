@@ -28,10 +28,6 @@ zisa_memory_root=$(realpath $(dirname $(readlink -f $0))/..)
 
 install_dir=$(${zisa_memory_root}/bin/install_dir.sh $1 $2 --zisa_has_mpi=${ZISA_HAS_MPI})
 source_dir=${install_dir}/sources
-
-echo ${install_dir}
-echo ${source_dir}
-
 conan_file=${zisa_memory_root}/conanfile.txt
 
 if [[ -f $conan_file ]]
