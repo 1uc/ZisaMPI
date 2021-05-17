@@ -29,15 +29,15 @@ Request isend(const array_const_view<T, n_dims, row_major> &arr,
 
   auto ptr = (void *)arr.raw();
   auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
-  auto request = std::make_unique<MPI_Request>();
-  *request = MPI_Request{}; // Looks dodgy...
 
-  auto code
-      = MPI_Isend(ptr, n_bytes, MPI_BYTE, receiver, tag, comm, request.get());
+  auto request = Request(std::make_unique<MPI_Request>(MPI_Request{}));
+
+  auto code = MPI_Isend(
+      ptr, n_bytes, MPI_BYTE, receiver, tag, comm, request.request_ptr());
   LOG_ERR_IF(code != MPI_SUCCESS,
              string_format("MPI_Isend failed. [%d]", code));
 
-  return Request(std::move(request));
+  return request;
 }
 
 template <class POD>
@@ -95,15 +95,15 @@ Request irecv(const array_view<T, n_dims, row_major> &arr,
 
   auto ptr = (void *)arr.raw();
   auto n_bytes = integer_cast<int>(arr.size() * sizeof(T));
-  auto request = std::make_unique<MPI_Request>();
-  *request = MPI_Request{};
 
-  auto code
-      = MPI_Irecv(ptr, n_bytes, MPI_BYTE, sender, tag, comm, request.get());
+  auto request = Request(std::make_unique<MPI_Request>(MPI_Request{}));
+
+  auto code = MPI_Irecv(
+      ptr, n_bytes, MPI_BYTE, sender, tag, comm, request.request_ptr());
   LOG_ERR_IF(code != MPI_SUCCESS,
              string_format("MPI_Irecv failed. [%d]", code));
 
-  return Request(std::move(request));
+  return request;
 }
 
 template <class T>

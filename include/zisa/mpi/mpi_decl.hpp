@@ -26,6 +26,7 @@ public:
 
   /// Wait until the data transfer is complete.
   void wait() const;
+  MPI_Request *request_ptr() const;
 
 private:
   std::unique_ptr<MPI_Request> request = nullptr;
@@ -41,12 +42,19 @@ struct Status {
   explicit Status(const MPI_Status &status);
 };
 
+std::string error_message(int code);
+
+void wait(MPI_Request *const request_ptr);
+void wait(const Request &request);
+
 void wait_all(const std::vector<Request> &requests);
 
 int size(const MPI_Comm &mpi_comm = MPI_COMM_WORLD);
 int rank(const MPI_Comm &mpi_comm = MPI_COMM_WORLD);
 bool test_intra(const MPI_Comm &comm);
 bool test_inter(const MPI_Comm &comm);
+
+std::string comm_get_name(const MPI_Comm &comm);
 
 template <class T, int n_dims>
 void send(const array_const_view<T, n_dims, row_major> &arr,
@@ -93,6 +101,7 @@ void bcast(const array_view<T, n_dims, row_major> &view,
 
 MPI_Comm comm_split(MPI_Comm old_comm, int color, int rank);
 
+void barrier();
 void barrier(const MPI_Comm &comm);
 
 }
