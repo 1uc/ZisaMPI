@@ -14,6 +14,8 @@ then
     echo "                               [--zisa_has_cuda=ZISA_HAS_CUDA]"
     echo "                               [--zisa_has_hdf5=ZISA_HAS_HDF5]"
     echo "                               [--zisa_has_netcdf=ZISA_HAS_NETCDF]"
+    echo "                               [--cmake=CUSTOM_CMAKE_BINARY]"
+    echo "                               [--print_install_dir]"
     exit -1
 fi
 
@@ -34,6 +36,9 @@ do
             ;;
         --cmake=*)
             CMAKE="$(realpath "${arg#*=}")"
+            ;;
+        --print_install_dir)
+            PRINT_INSTALL_PATH=1
             ;;
         *)
             ;;
@@ -70,9 +75,21 @@ zisa_root="$(realpath "$(dirname "$(readlink -f "$0")")"/..)"
 CC="$1"
 CXX="$(${zisa_root}/bin/cc2cxx.sh $CC)"
 
-install_dir="$("${zisa_root}/bin/install_dir.sh" "$1" "$2" --zisa_has_mpi=${ZISA_HAS_MPI})"
+install_dir="$(
+    "${zisa_root}/bin/install_dir.sh" "$1" "$2" \
+        --zisa_has_mpi=${ZISA_HAS_MPI} \
+        --zisa_has_cuda=${ZISA_HAS_CUDA} \
+        --zisa_has_hdf5=${ZISA_HAS_HDF5} \
+        --zisa_has_netcdf=${ZISA_HAS_NETCDF} \
+)"
 source_dir="${install_dir}/sources"
 conan_file="${zisa_root}/conanfile.txt"
+
+if [[ ${PRINT_INSTALL_PATH} -eq 1 ]]
+then
+  echo $install_dir
+  exit 0
+fi
 
 mkdir -p "${install_dir}/conan" && cd "${install_dir}/conan"
 conan install "$conan_file" \
