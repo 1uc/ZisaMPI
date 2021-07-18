@@ -12,6 +12,8 @@ if [[ "$#" -lt 2 ]]
 then
     echo "Usage: $0 COMPILER DESTINATION [--zisa_has_mpi=ZISA_HAS_MPI]"
     echo "                               [--zisa_has_cuda=ZISA_HAS_CUDA]"
+    echo "                               [--zisa_has_hdf5=ZISA_HAS_HDF5]"
+    echo "                               [--zisa_has_netcdf=ZISA_HAS_NETCDF]"
     exit -1
 fi
 
@@ -23,6 +25,12 @@ do
             ;;
         --zisa_has_cuda=*)
             ZISA_HAS_CUDA=${arg#*=}
+            ;;
+        --zisa_has_hdf5=*)
+            ZISA_HAS_HDF5=${arg#*=}
+            ;;
+        --zisa_has_netcdf=*)
+            ZISA_HAS_NETCDF=${arg#*=}
             ;;
         --cmake=*)
             CMAKE="$(realpath "${arg#*=}")"
@@ -39,12 +47,22 @@ fi
 
 if [[ -z "${ZISA_HAS_MPI}" ]]
 then
-    ZISA_HAS_MPI=0
+    ZISA_HAS_MPI=1
 fi
 
 if [[ -z "${ZISA_HAS_CUDA}" ]]
 then
-    ZISA_HAS_CUDA=1
+    ZISA_HAS_CUDA=0
+fi
+
+if [[ -z "${ZISA_HAS_NETCDF}" ]]
+then
+    ZISA_HAS_NETCDF=0
+fi
+
+if [[ -z "${ZISA_HAS_HDF5}" ]]
+then
+    ZISA_HAS_HDF5=0
 fi
 
 zisa_root="$(realpath "$(dirname "$(readlink -f "$0")")"/..)"
@@ -70,7 +88,7 @@ do
     # If necessary and reasonable remove ${src_dir}.
     if [[ -d "${src_dir}" ]]
     then
-        cd "${src_dir}"
+        pushd "${src_dir}"
 
         if [[ -z $(git remote -v 2>/dev/null | grep ${repo_url}) ]]
         then
@@ -78,39 +96,42 @@ do
             exit -1
 
         else
-            cd "${HOME}"
+            popd
             rm -rf "${src_dir}"
         fi
     fi
 
     git clone ${repo_url} "${src_dir}"
+    pushd "${src_dir}"
 
-    mkdir -p "${src_dir}/build-dep"
-    cd "${src_dir}/build-dep"
-
+    BUILD_DIR="build-dep"
     "${CMAKE}" -DCMAKE_INSTALL_PREFIX="${install_dir}/zisa" \
-             -DCMAKE_PREFIX_PATH="${install_dir}/zisa/lib/cmake/zisa" \
-             -DCMAKE_MODULE_PATH="${install_dir}/conan" \
-             -DCMAKE_PROJECT_${dep}_INCLUDE="${install_dir}/conan/conan_paths.cmake" \
-             -DCMAKE_C_COMPILER="${CC}" \
-             -DCMAKE_CXX_COMPILER="${CXX}" \
-             -DZISA_HAS_MPI="${ZISA_HAS_MPI}" \
-             -DCMAKE_BUILD_TYPE="Release" \
-             ..
+               -DCMAKE_PREFIX_PATH="${install_dir}/zisa/lib/cmake/zisa" \
+               -DCMAKE_PROJECT_${dep}_INCLUDE="${install_dir}/conan/conan_paths.cmake" \
+               -DCMAKE_C_COMPILER="${CC}" \
+               -DCMAKE_CXX_COMPILER="${CXX}" \
+               -DZISA_HAS_MPI="${ZISA_HAS_MPI}" \
+               -DZISA_HAS_CUDA="${ZISA_HAS_CUDA}" \
+               -DZISA_HAS_HDF5="${ZISA_HAS_HDF5}" \
+               -DZISA_HAS_NETCDF="${ZISA_HAS_NETCDF}" \
+               -DCMAKE_BUILD_TYPE="Release" \
+               -B "${BUILD_DIR}"
 
-    "${CMAKE}" --build . --parallel $(nproc)
-    "${CMAKE}" --install .
+    "${CMAKE}" --build "${BUILD_DIR}" --parallel $(nproc)
+    "${CMAKE}" --install "${BUILD_DIR}"
+
+    popd
 done
 
 echo "The dependencies were installed at"
 echo "    export DEP_DIR=${install_dir}"
 echo ""
 echo "Use"
-echo "    \"${CMAKE}\" \\ "
-echo "          -DCMAKE_PROJECT_${component_name}_INCLUDE=${install_dir}/conan/conan_paths.cmake \\ "
-echo "          -DCMAKE_MODULE_PATH=${install_dir}/conan \\ "
-echo "          -DCMAKE_PREFIX_PATH=${install_dir}/zisa/lib/cmake/zisa \\ "
-echo "          -DCMAKE_C_COMPILER=${CC} \\ "
-echo "          -DCMAKE_CXX_COMPILER=${CXX} \\ "
-echo "          -DZISA_HAS_MPI=${ZISA_HAS_MPI} \\ "
-echo "          REMAINING_ARGS "
+echo "    ${CMAKE} \ "
+echo "        -DCMAKE_PROJECT_${component_name}_INCLUDE=${install_dir}/conan/conan_paths.cmake \ "
+echo "        -DCMAKE_PREFIX_PATH=${install_dir}/zisa/lib/cmake/zisa \ "
+echo "        -DCMAKE_C_COMPILER=${CC} \ "
+echo "        -DCMAKE_CXX_COMPILER=${CXX} \ "
+echo "        -DZISA_HAS_CUDA=${ZISA_HAS_CUDA} \ "
+echo "        -DCMAKE_BUILD_TYPE=FastDebug \ "
+echo "        -B build "

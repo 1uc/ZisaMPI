@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 project(ZisaMPI VERSION 0.1)
+if(ZISA_HAS_CUDA)
+  message(AUTHOR_WARNING "You're the first to use CUDA. Please report (or fix) issues.")
+  enable_language(CUDA)
+endif()
 
 include("cmake/has_build_type.cmake")
 include("cmake/warning_flags.cmake")
@@ -17,7 +21,7 @@ target_link_libraries(mpi_dependencies INTERFACE stdc++fs)
 # MPI
 if(ZISA_HAS_MPI)
   find_package(MPI REQUIRED)
-  target_compile_definitions(mpi_dependencies INTERFACE ZISA_HAS_MPI=1)
+  target_compile_definitions(mpi_dependencies INTERFACE ZISA_HAS_MPI=${ZISA_HAS_MPI})
   target_link_libraries(mpi_dependencies INTERFACE MPI::MPI_CXX)
 endif()
 
@@ -25,6 +29,7 @@ endif()
 if(ZISA_LOG_LEVEL)
   target_compile_definitions(mpi_dependencies INTERFACE ZISA_LOG_LEVEL=${ZISA_LOG_LEVEL})
 endif()
+
 
 # -- Internal dependencies -----------------------------------------------------
 find_package(ZisaCore REQUIRED)
