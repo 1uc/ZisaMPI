@@ -30,6 +30,6 @@ library. Take a look at the [project specific flags] for CMake if you want to
 modify something. If this didn't work, it's not going to be a quick start.
 Please read [Dependencies] and then [Building].
 
-[project specific flags]: https://1uc.github.io/ZisaMPI/md_cmake.html#cmake_flags
+[project specific flags]: https://1uc.github.io/ZisaMPI/md_building.html#cmake_flags
 [Dependencies]: https://1uc.github.io/ZisaMPI/md_dependencies.html
-[Building]: https://1uc.github.io/ZisaMPI/md_cmake.html
+[Building]: https://1uc.github.io/ZisaMPI/md_building.html
