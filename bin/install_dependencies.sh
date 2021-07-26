@@ -124,6 +124,7 @@ do
     BUILD_DIR="build-dep"
     "${CMAKE}" -DCMAKE_INSTALL_PREFIX="${install_dir}/zisa" \
                -DCMAKE_PREFIX_PATH="${install_dir}/zisa/lib/cmake/zisa" \
+               -DCMAKE_MODULE_PATH="${install_dir}/zisa/lib/cmake/zisa" \
                -DCMAKE_PROJECT_${dep}_INCLUDE="${install_dir}/conan/conan_paths.cmake" \
                -DCMAKE_C_COMPILER="${CC}" \
                -DCMAKE_CXX_COMPILER="${CXX}" \
@@ -147,6 +148,7 @@ echo "Use"
 echo "    ${CMAKE} \ "
 echo "        -DCMAKE_PROJECT_${component_name}_INCLUDE=${install_dir}/conan/conan_paths.cmake \ "
 echo "        -DCMAKE_PREFIX_PATH=${install_dir}/zisa/lib/cmake/zisa \ "
+echo "        -DCMAKE_MODULE_PATH=${install_dir}/zisa/lib/cmake/zisa \ "
 echo "        -DCMAKE_C_COMPILER=${CC} \ "
 echo "        -DCMAKE_CXX_COMPILER=${CXX} \ "
 echo "        -DZISA_HAS_CUDA=${ZISA_HAS_CUDA} \ "
