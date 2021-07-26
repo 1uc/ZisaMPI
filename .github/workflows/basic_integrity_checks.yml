@@ -39,10 +39,11 @@ jobs:
           echo "${ZISA_BOT_SSH_KEY}" > ${HOME}/.ssh/id_ed25519
           chmod 700 ${HOME}/.ssh/id_ed25519
 
+
       - name: Install MPI
         if: matrix.zisa_has_mpi == 1
         run: |
-          sudo apt-get install -y --fix-missing openmpi-bin libopenmpi-dev
+          sudo apt-get install -y openmpi-bin libopenmpi-dev
 
       - name: Install HDF5
         run: |
