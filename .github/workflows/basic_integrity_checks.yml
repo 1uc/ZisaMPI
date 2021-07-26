@@ -30,15 +30,9 @@ jobs:
       # Checks-out the repository.
       - uses: actions/checkout@v2
 
-      - name: Obtain access to private repos.
-        env:
-          ZISA_BOT_SSH_KEY: ${{ secrets.ZISA_BOT_SSH_KEY }}
-
+      - name: Update Ubuntu
         run: |
-          mkdir -p ${HOME}/.ssh
-          echo "${ZISA_BOT_SSH_KEY}" > ${HOME}/.ssh/id_ed25519
-          chmod 700 ${HOME}/.ssh/id_ed25519
-
+          sudo apt-get update
 
       - name: Install MPI
         if: matrix.zisa_has_mpi == 1
